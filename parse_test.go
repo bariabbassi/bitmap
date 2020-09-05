@@ -42,27 +42,24 @@ func TestRead1PixelFile(t *testing.T) {
 }
 
 func TestReadEmptyFile(t *testing.T) {
-	fileLines, err := readFile("./testfiles/empty_file.txt")
+	_, err := readFile("./testfiles/empty_file.txt")
 	if err.Error() != "File contains too litle data" {
 		t.Error(err)
 	}
-	_ = fileLines
 }
 
 func TestRead1LineFile(t *testing.T) {
-	fileLines, err := readFile("./testfiles/1_line_file.txt")
+	_, err := readFile("./testfiles/1_line_file.txt")
 	if err.Error() != "File contains too litle data" {
 		t.Error(err)
 	}
-	_ = fileLines
 }
 
 func TestRead2LineFile(t *testing.T) {
-	fileLines, err := readFile("./testfiles/2_lines_file.txt")
+	_, err := readFile("./testfiles/2_lines_file.txt")
 	if err.Error() != "File contains too litle data" {
 		t.Error(err)
 	}
-	_ = fileLines
 }
 
 /////////////////////// Parse Bitmaps Number ///////////////////////
@@ -248,5 +245,99 @@ func TestParseDefaultBitmap(t *testing.T) {
 
 	if !(reflect.DeepEqual(bitmap.BlackPixels, expectedBlackPixels)) {
 		t.Error("Black pixels read incorrectly")
+	}
+}
+
+func TestParseWrongBitmap(t *testing.T) {
+	index := 1
+	fileLines := []string{"1", "3 4", "0001", "00*1", "0110"}
+	_, err := parseBitmap(index, fileLines)
+	if err.Error() != "A bitmap can only contain ones and zeros" {
+		t.Error(err)
+	}
+}
+
+func TestParseBlackBitmap(t *testing.T) {
+	index := 1
+	fileLines := []string{"1", "3 4", "0000", "0000", "0000"}
+	_, err := parseBitmap(index, fileLines)
+	if err.Error() != "A bitmap should contain at least 1 white pixel" {
+		t.Error(err)
+	}
+}
+
+/////////////////////// Parse Black Pixel ///////////////////////
+
+func TestParseDefaultBlackPixel(t *testing.T) {
+	expectedI, expectedJ := 3, 4
+
+	i, j, err := parseBlackPixel("3 4")
+	if err != nil {
+		t.Error(err)
+	}
+	if j != expectedJ || i != expectedI {
+		t.Error("Black pixel parsed incorrectly")
+	}
+}
+
+func TestParseDefaultBlackPixel2(t *testing.T) {
+	expectedI, expectedJ := 1, 180
+
+	i, j, err := parseBlackPixel("1 180")
+	if err != nil {
+		t.Error(err)
+	}
+	if j != expectedJ || i != expectedI {
+		t.Error("Black pixel parsed incorrectly")
+	}
+}
+
+func TestParseEmptyBlackPixel(t *testing.T) {
+	_, _, err := parseBlackPixel("")
+	if err.Error() != "Black pixel key should contain 2 numbers: i and j" {
+		t.Error(err)
+	}
+
+}
+
+func TestParse1BlackPixel(t *testing.T) {
+	_, _, err := parseBlackPixel("10")
+	if err.Error() != "Black pixel key should contain 2 numbers: i and j" {
+		t.Error(err)
+	}
+}
+
+func TestParse3BlackPixel(t *testing.T) {
+	_, _, err := parseBlackPixel("3 4 5")
+	if err.Error() != "Black pixel key should contain 2 numbers: i and j" {
+		t.Error(err)
+	}
+}
+
+func TestParseAlphaBlackPixel(t *testing.T) {
+	_, _, err := parseBlackPixel("27 a")
+	if err.Error() != `strconv.Atoi: parsing "a": invalid syntax` {
+		t.Error(err)
+	}
+}
+
+func TestParseSpacedBlackPixel(t *testing.T) {
+	_, _, err := parseBlackPixel("36  5")
+	if err.Error() != "Black pixel key should contain 2 numbers: i and j" {
+		t.Error(err)
+	}
+}
+
+func TestParseNegativeBlackPixel(t *testing.T) {
+	_, _, err := parseBlackPixel("40 -2")
+	if err.Error() != "Black pixel's j is out of range" {
+		t.Error(err)
+	}
+}
+
+func TestParse183BlackPixel(t *testing.T) {
+	_, _, err := parseBlackPixel("182 7")
+	if err.Error() != "Black pixel's i is out of range" {
+		t.Error(err)
 	}
 }

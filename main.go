@@ -10,25 +10,21 @@ const maxDimension = 182
 
 func main() {
 	// Read file
-	fileLines, err := readFile("./testfiles/default_file.txt")
+	fileLines, err := readFile("./testfiles/big_file.txt") // there are other files are in ./testfiles
 	if err != nil {
 		log.Fatal(err)
 	}
-	fmt.Println(fileLines)
-	fmt.Println(len(fileLines))
 
 	// Parse the number of bitmaps
 	bitmapsNumber, err := parseBitmapsNumber(fileLines[0])
 	if err != nil {
 		log.Fatal(err)
 	}
-	fmt.Println(bitmapsNumber)
-	fmt.Println()
+	bitmaps := make([]Bitmap, bitmapsNumber)
 
 	// Parse all bitmaps
-	bitmaps := make([]Bitmap, bitmapsNumber)
+	index := 1        // index of the 1st line of a bitmap. it jumps by bitmap length
 	bitmapsCount := 0 // the i in this while loop
-	index := 1        // index of the 1st line of a bitmap
 	for index < len(fileLines) && bitmapsCount < bitmapsNumber {
 		bitmaps[bitmapsCount], err = parseBitmap(index, fileLines)
 		if err != nil {
@@ -39,10 +35,21 @@ func main() {
 		bitmapsCount++
 	}
 
-	// Print Bitmap
+	// Print bitmaps
+	fmt.Println("# Bitmaps:")
 	for _, bitmap := range bitmaps {
 		fmt.Println(bitmap.String())
-		fmt.Println(bitmap.WhitePixels)
-		fmt.Println(bitmap.BlackPixels)
+	}
+
+	// Count distances
+	for _, bitmap := range bitmaps {
+		bitmap.CountCloseDistances()
+		bitmap.CountFarDistances()
+	}
+
+	// Print distances
+	fmt.Println("# Distances:")
+	for _, bitmap := range bitmaps {
+		fmt.Println(bitmap.Output())
 	}
 }

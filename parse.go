@@ -105,6 +105,10 @@ func parseBitmap(index int, fileLines []string) (Bitmap, error) {
 		}
 	}
 
+	if len(bitmap.WhitePixels) < 1 {
+		return bitmap, errors.New("A bitmap should contain at least 1 white pixel")
+	}
+
 	// initiate distances
 	bitmap.Distances = make([][]int, bitmap.Length)
 	for i := range bitmap.Distances {
@@ -112,4 +116,31 @@ func parseBitmap(index int, fileLines []string) (Bitmap, error) {
 	}
 
 	return bitmap, nil
+}
+
+// parseBlackPixel converts black pixel's string key to 2 ints i and j
+func parseBlackPixel(key string) (int, int, error) {
+	blackPixel := strings.Split(key, " ")
+
+	if len(blackPixel) != 2 {
+		return 0, 0, errors.New("Black pixel key should contain 2 numbers: i and j")
+	}
+
+	i, err := strconv.Atoi(blackPixel[0])
+	if err != nil {
+		return 0, 0, err
+	}
+	if i < 0 || i > maxDimension-1 {
+		return 0, 0, errors.New("Black pixel's i is out of range")
+	}
+
+	j, err := strconv.Atoi(blackPixel[1])
+	if err != nil {
+		return 0, 0, err
+	}
+	if j < 0 || i > maxDimension {
+		return 0, 0, errors.New("Black pixel's j is out of range")
+	}
+
+	return i, j, nil
 }
